@@ -1,0 +1,228 @@
+
+{% extends "base.html" %}
+
+{% block title %}Accueil - Password Manager{% endblock %}
+
+{% block content %}
+<div class="row align-items-center min-vh-70">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold text-primary">
+            <i class="fas fa-lock"></i> Gestionnaire de Mots de Passe
+        </h1>
+        <p class="lead mt-3">
+            Stockez, gérez et vérifiez vos mots de passe en toute sécurité.
+            Chiffrement AES-256, vérification API et interface intuitive.
+        </p>
+        
+        <div class="mt-5">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Chiffrement Fort</h5>
+                            <p class="card-text">AES-256 pour protéger vos données</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-bolt fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">Génération Rapide</h5>
+                            <p class="card-text">Mots de passe sécurisés en 1 clic</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-search fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Vérification API</h5>
+                            <p class="card-text">Détectez les fuites de données</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-mobile-alt fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Interface Web</h5>
+                            <p class="card-text">Accessible depuis n'importe où</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-user-plus"></i> Commencer gratuitement
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <h3 class="text-center mb-4">Générateur en direct</h3>
+                
+                <div class="mb-3">
+                    <label class="form-label">Longueur du mot de passe</label>
+                    <input type="range" class="form-range" id="lengthRange" min="8" max="32" value="16">
+                    <div class="d-flex justify-content-between">
+                        <span>8</span>
+                        <span id="lengthValue">16</span>
+                        <span>32</span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="lowercase" checked>
+                            <label class="form-check-label" for="lowercase">
+                                Lettres minuscules (a-z)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="digits" checked>
+                            <label class="form-check-label" for="digits">
+                                Chiffres (0-9)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="uppercase" checked>
+                            <label class="form-check-label" for="uppercase">
+                                Lettres majuscules (A-Z)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="symbols" checked>
+                            <label class="form-check-label" for="symbols">
+                                Symboles (!@#$...)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <button class="btn btn-warning w-100" id="generateBtn">
+                        <i class="fas fa-magic"></i> Générer un mot de passe
+                    </button>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Résultat</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="passwordResult" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="copyBtn">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="strengthMeter" class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar" id="strengthBar" style="width: 0%"></div>
+                </div>
+                <div class="text-center small text-muted" id="strengthText">
+                    Force : Non calculée
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const lengthRange = document.getElementById('lengthRange');
+    const lengthValue = document.getElementById('lengthValue');
+    const generateBtn = document.getElementById('generateBtn');
+    const passwordResult = document.getElementById('passwordResult');
+    const copyBtn = document.getElementById('copyBtn');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    
+    // Mettre à jour l'affichage de la longueur
+    lengthRange.addEventListener('input', function() {
+        lengthValue.textContent = this.value;
+    });
+    
+    // Générer un mot de passe
+    generateBtn.addEventListener('click', async function() {
+        const config = {
+            length: parseInt(lengthRange.value),
+            lowercase: document.getElementById('lowercase').checked,
+            uppercase: document.getElementById('uppercase').checked,
+            digits: document.getElementById('digits').checked,
+            symbols: document.getElementById('symbols').checked
+        };
+        
+        try {
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(config)
+            });
+            
+            const data = await response.json();
+            passwordResult.value = data.password;
+            
+            // Mettre à jour la force
+            strengthBar.style.width = data.strength + '%';
+            strengthBar.className = 'progress-bar';
+            
+            if (data.strength >= 80) {
+                strengthBar.classList.add('bg-success');
+                strengthText.textContent = 'Force : Très fort';
+            } else if (data.strength >= 60) {
+                strengthBar.classList.add('bg-warning');
+                strengthText.textContent = 'Force : Fort';
+            } else if (data.strength >= 40) {
+                strengthBar.classList.add('bg-info');
+                strengthText.textContent = 'Force : Moyen';
+            } else {
+                strengthBar.classList.add('bg-danger');
+                strengthText.textContent = 'Force : Faible';
+            }
+            
+            if (data.breach_count > 0) {
+                strengthText.textContent += ` ⚠️ ${data.breach_count} fuites`;
+            }
+            
+        } catch (error) {
+            console.error('Erreur:', error);
+        }
+    });
+    
+    // Copier dans le presse-papier
+    copyBtn.addEventListener('click', function() {
+        passwordResult.select();
+        document.execCommand('copy');
+        
+        // Animation de feedback
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+        copyBtn.classList.remove('btn-outline-secondary');
+        copyBtn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.classList.remove('btn-success');
+            copyBtn.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+    
+    // Générer un mot de passe au chargement
+    generateBtn.click();
+});
+</script>
+{% endblock %}
+

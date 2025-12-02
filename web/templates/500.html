@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Erreur serveur{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="error-container">
+        <div class="error-number">
+            <h1 class="display-1 text-danger">5<span class="text-warning">0</span>0</h1>
+        </div>
+        
+        <div class="error-icon mb-4">
+            <i class="fas fa-server fa-5x text-danger"></i>
+        </div>
+        
+        <h2 class="mb-3">Erreur interne du serveur</h2>
+        
+        <p class="lead mb-4">
+            Une erreur inattendue s'est produite. Notre équipe a été notifiée.
+        </p>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-danger shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger">
+                            <i class="fas fa-exclamation-circle"></i> 
+                            Dépannage
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-sync-alt text-info"></i> 
+                                Rafraîchissez la page
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-history text-info"></i> 
+                                Réessayez dans quelques minutes
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-trash-alt text-info"></i> 
+                                Effacez le cache de votre navigateur
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-warning">
+            <i class="fas fa-info-circle"></i>
+            Si le problème persiste, veuillez contacter l'administrateur du système.
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-home"></i> Retour à l'accueil
+            </a>
+            <button onclick="location.reload()" class="btn btn-warning btn-lg">
+                <i class="fas fa-redo"></i> Rafraîchir la page
+            </button>
+        </div>
+        
+        <div class="mt-5 text-muted small">
+            <p>
+                <i class="fas fa-code"></i> 
+                Erreur technique référence : SERVER_ERROR_500
+            </p>
+            <p>
+                <i class="fas fa-clock"></i> 
+                Horodatage : {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.error-number {
+    font-size: 8rem;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .error-number {
+        font-size: 6rem;
+    }
+}
+</style>
+
+{% set now = datetime.now %}
+{% endblock %}

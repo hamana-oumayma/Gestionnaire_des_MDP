@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Générateur - Password Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Générateur de mot de passe</h1>
+    
+    <form method="POST">
+        <div class="mb-3">
+            <label>Longueur :</label>
+            <input type="number" name="length" value="16" min="8" max="32" class="form-control">
+        </div>
+        
+        <div class="mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="lowercase" checked>
+                <label class="form-check-label">Lettres minuscules</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="uppercase" checked>
+                <label class="form-check-label">Lettres majuscules</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="digits" checked>
+                <label class="form-check-label">Chiffres</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="symbols" checked>
+                <label class="form-check-label">Symboles</label>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Générer</button>
+    </form>
+    
+    {% if generated_password %}
+    <div class="alert alert-success mt-3">
+        <h4>Mot de passe généré :</h4>
+        <p class="fs-3">{{ generated_password }}</p>
+        <p>Longueur : {{ generated_password|length }} caractères</p>
+        
+        {% if breach_check %}
+        <div class="alert alert-warning">
+            Attention : trouvé dans {{ breach_check }} fuites
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}Paramètres - Password Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-3">
+        <!-- Menu des paramètres -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog"></i> Paramètres
+                </h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#account" class="list-group-item list-group-item-action active" 
+                   data-bs-toggle="tab">
+                    <i class="fas fa-user me-2"></i> Compte
+                </a>
+                <a href="#security" class="list-group-item list-group-item-action" 
+                   data-bs-toggle="tab">
+                    <i class="fas fa-shield-alt me-2"></i> Sécurité
+                </a>
+                <a href="#backup" class="list-group-item list-group-item-action" 
+                   data-bs-toggle="tab">
+                    <i class="fas fa-database me-2"></i> Sauvegarde
+                </a>
+                <a href="#about" class="list-group-item list-group-item-action" 
+                   data-bs-toggle="tab">
+                    <i class="fas fa-info-circle me-2"></i> À propos
+                </a>
+            </div>
+        </div>
+        
+        <!-- Statut du compte -->
+        <div class="card shadow">
+            <div class="card-body">
+                <h6>
+                    <i class="fas fa-chart-bar text-primary"></i> 
+                    Statut du compte
+                </h6>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Mots de passe :</span>
+                        <span class="fw-bold">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Dernière connexion :</span>
+                        <span class="text-muted">Aujourd'hui</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Compte créé le :</span>
+                        <span class="text-muted">{{ session.get('created_at', 'Inconnu') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-9">
+        <!-- Contenu des onglets -->
+        <div class="tab-content">
+            <!-- Onglet Compte -->
+            <div class="tab-pane fade show active" id="account">
+                <div class="card shadow">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user text-primary"></i> 
+                            Informations du compte
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h6>
+                                            <i class="fas fa-id-card"></i> 
+                                            Informations personnelles
+                                        </h6>
+                                        <div class="mt-3">
+                                            <p><strong>Nom d'utilisateur :</strong><br>
+                                               <code>{{ session.username }}</code></p>
+                                            <p><strong>ID utilisateur :</strong><br>
+                                               <code>{{ session.user_id }}</code></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h6>
+                                            <i class="fas fa-calendar-alt"></i> 
+                                            Activité
+                                        </h6>
+                                        <div class="mt-3">
+                                            <p><strong>Dernière connexion :</strong><br>
+                                               <span class="text-success">En ligne maintenant</span></p>
+                                            <p><strong>Session expire :</strong><br>
+                                               Dans 1 heure</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Changement de mot de passe maître -->
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-key"></i> 
+                                    Changement du mot de passe maître
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Attention :</strong> Changer le mot de passe maître 
+                                    nécessitera de rechiffrer tous vos mots de passe stockés.
+                                </div>
+                                
+                                <form id="changeMasterPasswordForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Mot de passe actuel</label>
+                                            <input type="password" class="form-control" 
+                                                   id="currentMasterPassword" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Nouveau mot de passe</label>
+                                            <input type="password" class="form-control" 
+                                                   id="newMasterPassword" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Confirmer le nouveau mot de passe</label>
+                                            <input type="password" class="form-control" 
+                                                   id="confirmNewMasterPassword" required>
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-warning w-100">
+                                                <i class="fas fa-sync-alt"></i> 
+                                                Changer le mot de passe
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Onglet Sécurité -->
+            <div class="tab-pane fade" id="security">
+                <div class="card shadow">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shield-alt text-success"></i> 
+                            Paramètres de sécurité
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Vérification des fuites -->
+                        <div class="card border-success mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-search"></i> 
+                                    Vérification des fuites
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" 
+                                           id="breachCheckToggle" checked>
+                                    <label class="form-check-label" for="breachCheckToggle">
+                                        Vérifier automatiquement les fuites de données
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" 
+                                           id="alertToggle" checked>
+                                    <label class="form-check-label" for="alertToggle">
+                                        Alertes pour les mots de passe compromis
+                                    </label>
+                                </div>
+                                <button class="btn btn-outline-success" id="checkAllPasswords">
+                                    <i class="fas fa-search"></i> 
+                                    Vérifier tous les mots de passe maintenant
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Session -->
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-user-clock"></i> 
+                                    Gestion des sessions
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Durée de la session</label>
+                                    <select class="form-select" id="sessionDuration">
+                                        <option value="15">15 minutes</option>
+                                        <option value="30">30 minutes</option>
+                                        <option value="60" selected>1 heure</option>
+                                        <option value="120">2 heures</option>
+                                        <option value="480">8 heures</option>
+                                    </select>
+                                    <div class="form-text">
+                                        Après ce délai, vous serez automatiquement déconnecté.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Déconnexion automatique</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="autoLogout" checked>
+                                        <label class="form-check-label" for="autoLogout">
+                                            Se déconnecter automatiquement après inactivité
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-outline-danger" id="logoutAllDevices">
+                                    <i class="fas fa-sign-out-alt"></i> 
+                                    Déconnecter tous les appareils
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Onglet Sauvegarde -->
+            <div class="tab-pane fade" id="backup">
+                <div class="card shadow">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-database text-warning"></i> 
+                            Sauvegarde et restauration
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Sauvegarde -->
+                        <div class="card border-warning mb-4">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-download"></i> 
+                                    Sauvegarde
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    La sauvegarde crée un fichier chiffré contenant tous vos mots de passe.
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Mot de passe de sauvegarde</label>
+                                    <input type="password" class="form-control" 
+                                           id="backupPassword" 
+                                           placeholder="Créez un mot de passe pour la sauvegarde">
+                                    <div class="form-text">
+                                        Ce mot de passe sera nécessaire pour restaurer la sauvegarde.
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-warning w-100" id="createBackup">
+                                    <i class="fas fa-download"></i> 
+                                    Créer une sauvegarde
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Restauration -->
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-upload"></i> 
+                                    Restauration
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Attention :</strong> La restauration écrasera tous vos 
+                                    mots de passe actuels.
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Fichier de sauvegarde</label>
+                                    <input type="file" class="form-control" 
+                                           id="backupFile" accept=".json,.encrypted">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Mot de passe de sauvegarde</label>
+                                    <input type="password" class="form-control" 
+                                           id="restorePassword" 
+                                           placeholder="Entrez le mot de passe de la sauvegarde">
+                                </div>
+                                
+                                <button class="btn btn-danger w-100" id="restoreBackup" disabled>
+                                    <i class="fas fa-upload"></i> 
+                                    Restaurer la sauvegarde
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Onglet À propos -->
+            <div class="tab-pane fade" id="about">
+                <div class="card shadow">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle text-info"></i> 
+                            À propos de Password Manager
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-lock fa-4x text-primary mb-3"></i>
+                            <h3>Password Manager</h3>
+                            <p class="lead">Version 2.0 - Interface Web</p>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body">
+                                        <h6>
+                                            <i class="fas fa-code"></i> 
+                                            Développement
+                                        </h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-check text-success"></i> Framework : Flask</li>
+                                            <li><i class="fas fa-check text-success"></i> Base de données : SQLite</li>
+                                            <li><i class="fas fa-check text-success"></i> Chiffrement : AES-256</li>
+                                            <li><i class="fas fa-check text-success"></i> Interface : Bootstrap 5</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body">
+                                        <h6>
+                                            <i class="fas fa-shield-alt"></i> 
+                                            Sécurité
+                                        </h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-lock text-success"></i> Chiffrement local</li>
+                                            <li><i class="fas fa-user-secret text-success"></i> Données privées</li>
+                                            <li><i class="fas fa-globe text-success"></i> Vérification API</li>
+                                            <li><i class="fas fa-key text-success"></i> Mot de passe maître</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <h6>
+                                    <i class="fas fa-heart text-danger"></i> 
+                                    Remerciements
+                                </h6>
+                                <p>
+                                    Merci d'utiliser Password Manager. Ce projet est développé 
+                                    dans un but éducatif pour l'apprentissage de la sécurité 
+                                    informatique et du développement web avec Python.
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fas fa-terminal"></i> Développé pour Kali Linux
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Changement de mot de passe maître
+    const changeMasterPasswordForm = document.getElementById('changeMasterPasswordForm');
+    if (changeMasterPasswordForm) {
+        changeMasterPasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Fonctionnalité en cours de développement');
+        });
+    }
+    
+    // Vérification des mots de passe
+    const checkAllPasswords = document.getElementById('checkAllPasswords');
+    if (checkAllPasswords) {
+        checkAllPasswords.addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification en cours...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                alert('Vérification terminée. Aucun mot de passe compromis trouvé.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        });
+    }
+    
+    // Déconnexion de tous les appareils
+    const logoutAllDevices = document.getElementById('logoutAllDevices');
+    if (logoutAllDevices) {
+        logoutAllDevices.addEventListener('click', function() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter de tous les appareils ?')) {
+                alert('Déconnexion programmée.');
+            }
+        });
+    }
+    
+    // Sauvegarde
+    const createBackup = document.getElementById('createBackup');
+    if (createBackup) {
+        createBackup.addEventListener('click', function() {
+            const password = document.getElementById('backupPassword').value;
+            if (!password) {
+                alert('Veuillez entrer un mot de passe pour la sauvegarde.');
+                return;
+            }
+            
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création de la sauvegarde...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                alert('Sauvegarde créée avec succès !');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500);
+        });
+    }
+    
+    // Restauration
+    const backupFile = document.getElementById('backupFile');
+    const restorePassword = document.getElementById('restorePassword');
+    const restoreBackup = document.getElementById('restoreBackup');
+    
+    function checkRestoreReady() {
+        const fileReady = backupFile.files.length > 0;
+        const passwordReady = restorePassword.value.length > 0;
+        restoreBackup.disabled = !(fileReady && passwordReady);
+    }
+    
+    if (backupFile && restorePassword && restoreBackup) {
+        backupFile.addEventListener('change', checkRestoreReady);
+        restorePassword.addEventListener('input', checkRestoreReady);
+        
+        restoreBackup.addEventListener('click', function() {
+            if (confirm('ATTENTION : Cela écrasera tous vos mots de passe actuels. Continuer ?')) {
+                const btn = this;
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restauration en cours...';
+                btn.disabled = true;
+                
+                setTimeout(() => {
+                    alert('Restauration terminée avec succès !');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

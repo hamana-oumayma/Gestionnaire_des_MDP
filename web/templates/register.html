@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription - Password Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-user-plus text-primary"></i> Créer un compte
+                </h2>
+                
+                <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="username" class="form-label fw-bold">
+                                <i class="fas fa-user"></i> Nom d'utilisateur
+                            </label>
+                            <input type="text" class="form-control form-control-lg" 
+                                   id="username" name="username" 
+                                   placeholder="Choisissez un nom d'utilisateur" required>
+                            <div class="form-text">
+                                Ce nom sera utilisé pour vous connecter
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-check-circle"></i> Disponibilité
+                            </label>
+                            <div class="form-control form-control-lg bg-light">
+                                <span id="usernameStatus" class="text-muted">Non vérifié</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-bold">
+                            <i class="fas fa-key"></i> Mot de passe maître
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg" 
+                                   id="password" name="password" 
+                                   placeholder="Créez un mot de passe fort" required>
+                            <button class="btn btn-outline-secondary" type="button" 
+                                    id="togglePassword1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" id="passwordStrength" 
+                                     style="width: 0%"></div>
+                            </div>
+                            <div class="form-text" id="passwordStrengthText">
+                                Force : Non évaluée
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label fw-bold">
+                            <i class="fas fa-key"></i> Confirmer le mot de passe
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg" 
+                                   id="confirm_password" name="confirm_password" 
+                                   placeholder="Ressaisissez le mot de passe" required>
+                            <button class="btn btn-outline-secondary" type="button" 
+                                    id="togglePassword2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="passwordMatch" class="form-text"></div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Important :</strong> Ce mot de passe maître est irrécupérable.
+                        Si vous le perdez, vous perdrez l'accès à tous vos mots de passe.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg py-3" 
+                                id="submitBtn" disabled>
+                            <i class="fas fa-user-plus"></i> Créer mon compte
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p>Déjà un compte ? 
+                        <a href="{{ url_for('login') }}" class="fw-bold">Connectez-vous</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card border-0 bg-light h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-lock text-success"></i> Sécurité
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Minimum 8 caractères</li>
+                            <li><i class="fas fa-check text-success"></i> Lettres et chiffres</li>
+                            <li><i class="fas fa-check text-success"></i> Symboles recommandés</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 bg-light h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-lightbulb text-warning"></i> Conseils
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-star text-warning"></i> Utilisez une phrase</li>
+                            <li><i class="fas fa-star text-warning"></i> Évitez les mots courants</li>
+                            <li><i class="fas fa-star text-warning"></i> Notez-le en sécurité</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const passwordStrengthText = document.getElementById('passwordStrengthText');
+    const passwordMatch = document.getElementById('passwordMatch');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Afficher/masquer les mots de passe
+    document.getElementById('togglePassword1').addEventListener('click', function() {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+    
+    document.getElementById('togglePassword2').addEventListener('click', function() {
+        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPassword.setAttribute('type', type);
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+    
+    // Vérifier la force du mot de passe
+    function checkPasswordStrength(pwd) {
+        let score = 0;
+        
+        // Longueur
+        if (pwd.length >= 8) score += 25;
+        if (pwd.length >= 12) score += 15;
+        
+        // Complexité
+        if (/[a-z]/.test(pwd)) score += 10;
+        if (/[A-Z]/.test(pwd)) score += 10;
+        if (/[0-9]/.test(pwd)) score += 10;
+        if (/[^A-Za-z0-9]/.test(pwd)) score += 10;
+        
+        // Pas de motifs simples
+        const patterns = ["123", "abc", "password", "qwerty"];
+        if (!patterns.some(pattern => pwd.toLowerCase().includes(pattern))) score += 20;
+        
+        return Math.min(score, 100);
+    }
+    
+    // Mettre à jour la force du mot de passe
+    password.addEventListener('input', function() {
+        const strength = checkPasswordStrength(this.value);
+        passwordStrength.style.width = strength + '%';
+        
+        if (strength < 40) {
+            passwordStrength.className = 'progress-bar bg-danger';
+            passwordStrengthText.textContent = 'Force : Faible';
+            passwordStrengthText.className = 'form-text text-danger';
+        } else if (strength < 70) {
+            passwordStrength.className = 'progress-bar bg-warning';
+            passwordStrengthText.textContent = 'Force : Moyenne';
+            passwordStrengthText.className = 'form-text text-warning';
+        } else if (strength < 90) {
+            passwordStrength.className = 'progress-bar bg-info';
+            passwordStrengthText.textContent = 'Force : Bonne';
+            passwordStrengthText.className = 'form-text text-info';
+        } else {
+            passwordStrength.className = 'progress-bar bg-success';
+            passwordStrengthText.textContent = 'Force : Excellente';
+            passwordStrengthText.className = 'form-text text-success';
+        }
+        
+        checkPasswordsMatch();
+    });
+    
+    // Vérifier si les mots de passe correspondent
+    function checkPasswordsMatch() {
+        const pwd1 = password.value;
+        const pwd2 = confirmPassword.value;
+        
+        if (pwd2 === '') {
+            passwordMatch.textContent = '';
+            passwordMatch.className = 'form-text';
+            submitBtn.disabled = true;
+            return;
+        }
+        
+        if (pwd1 === pwd2) {
+            passwordMatch.textContent = '✓ Les mots de passe correspondent';
+            passwordMatch.className = 'form-text text-success';
+            submitBtn.disabled = false;
+        } else {
+            passwordMatch.textContent = '✗ Les mots de passe ne correspondent pas';
+            passwordMatch.className = 'form-text text-danger';
+            submitBtn.disabled = true;
+        }
+    }
+    
+    confirmPassword.addEventListener('input', checkPasswordsMatch);
+});
+</script>
+{% endblock %}

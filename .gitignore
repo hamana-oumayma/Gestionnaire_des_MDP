@@ -1,0 +1,48 @@
+# FICHIERS SENSIBLES - NE JAMAIS PUSH SUR GITHUB !
+passwords.json
+master.key
+*.key
+*.pem
+*.encrypted
+
+# Base de données web
+web/data/passwords.db
+web/data/*.db
+
+# Environnements virtuels
+projet-env/
+env/
+venv/
+.venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Sauvegardes utilisateur
+backup_*
+sauvegarde_*
+Sauvegardes_Password/
+Mes_Sauvegardes_Password/
+
+# Fichiers temporaires
+*.tmp
+temp/
+tmp/
