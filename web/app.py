@@ -228,6 +228,89 @@ class PasswordManager:
         conn.close()
         
         return cursor.lastrowid
+
+    def get_password_by_id(self, user_id, master_password, password_id):
+        """Récupère un mot de passe spécifique par son ID."""
+        cipher = self.get_cipher(user_id, master_password)
+
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT id, service, username, encrypted_password, url, category, notes,
+                   breach_count, strength_score, created_at, updated_at
+            FROM passwords
+            WHERE id = ? AND user_id = ?
+        ''', (password_id, user_id))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            try:
+                decrypted_password = cipher.decrypt(row[3]).decode()
+                return {
+                    'id': row[0],
+                    'service': row[1],
+                    'username': row[2],
+                    'password': decrypted_password,
+                    'url': row[4],
+                    'category': row[5],
+                    'notes': row[6],
+                    'breach_count': row[7],
+                    'strength_score': row[8],
+                    'created_at': row[9],
+                    'updated_at': row[10]
+                }
+            except Exception as e:
+                print(f"⚠️  Erreur de déchiffrement: {e}")
+                return None
+        return None
+
+    def update_password(self, user_id, master_password, password_id, service, username, password,
+                       url='', category='Autre', notes=''):
+        """Met à jour un mot de passe existant."""
+        cipher = self.get_cipher(user_id, master_password)
+        encrypted_password = cipher.encrypt(password.encode())
+
+        # Vérifier les fuites
+        breach_count = self.check_breaches(password)
+
+        # Calculer la force
+        strength_score = self.calculate_strength(password)
+
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            UPDATE passwords
+            SET service = ?, username = ?, encrypted_password = ?, url = ?,
+                category = ?, notes = ?, breach_count = ?, strength_score = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND user_id = ?
+        ''', (service, username, encrypted_password, url, category, notes,
+              breach_count, strength_score, password_id, user_id))
+
+        conn.commit()
+        affected = cursor.rowcount
+        conn.close()
+
+        return affected > 0
+
+    def delete_password(self, user_id, password_id):
+        """Supprime un mot de passe."""
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+
+        cursor.execute('DELETE FROM passwords WHERE id = ? AND user_id = ?',
+                      (password_id, user_id))
+
+        conn.commit()
+        affected = cursor.rowcount
+        conn.close()
+
+        return affected > 0
+
     
     def get_passwords(self, user_id, master_password):
         """Récupère tous les mots de passe déchiffrés."""
@@ -519,6 +602,86 @@ def generator():
     return render_template('generator.html', 
                          generated_password=generated_password,
                          breach_check=breach_check)
+@app.route('/edit-password/<int:password_id>', methods=['GET', 'POST'])
+def edit_password(password_id):
+    """Modifier un mot de passe existant."""
+    if 'user_id' not in session:
+        flash('Veuillez vous connecter.', 'warning')
+        return redirect(url_for('login'))
+    
+    manager = PasswordManager()
+    
+    # Récupérer le mot de passe à modifier
+    password_data = manager.get_password_by_id(
+        session['user_id'],
+        session.get('master_password', ''),
+        password_id
+    )
+    
+    if not password_data:
+        flash('Mot de passe non trouvé.', 'danger')
+        return redirect(url_for('view_passwords'))
+    
+    if request.method == 'POST':
+        service = request.form.get('service')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        url = request.form.get('url', '')
+        category = request.form.get('category', 'Autre')
+        notes = request.form.get('notes', '')
+        
+        if not service or not username or not password:
+            flash('Les champs Service, Utilisateur et Mot de passe sont requis.', 'danger')
+        else:
+            success = manager.update_password(
+                session['user_id'],
+                session.get('master_password', ''),
+                password_id,
+                service, username, password, url, category, notes
+            )
+            
+            if success:
+                flash('Mot de passe modifié avec succès !', 'success')
+                return redirect(url_for('view_passwords'))
+            else:
+                flash('Erreur lors de la modification.', 'danger')
+    
+    return render_template('edit_password.html', password=password_data)
+
+@app.route('/delete-password/<int:password_id>', methods=['POST'])
+def delete_password(password_id):
+    """Supprimer un mot de passe."""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Non authentifié'}), 401
+
+    manager = PasswordManager()
+    success = manager.delete_password(session['user_id'], password_id)
+
+    if success:
+        flash('Mot de passe supprimé avec succès.', 'success')
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Mot de passe non trouvé'}), 404
+
+@app.route('/view-password/<int:password_id>')
+def view_password(password_id):
+    """Voir les détails d'un mot de passe spécifique."""
+    if 'user_id' not in session:
+        flash('Veuillez vous connecter.', 'warning')
+        return redirect(url_for('login'))
+
+    manager = PasswordManager()
+    password_data = manager.get_password_by_id(
+        session['user_id'],
+        session.get('master_password', ''),
+        password_id
+    )
+
+    if not password_data:
+        flash('Mot de passe non trouvé.', 'danger')
+        return redirect(url_for('view_passwords'))
+
+    return render_template('view_password.html', password=password_data)
 
 @app.route('/api/generate', methods=['POST'])
 def api_generate():
@@ -632,7 +795,7 @@ def export_backup():
         # Crée un nom de fichier
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         username = session.get('username', 'user').replace(' ', '_')
-        filename = f'password_backup_{username}_{timestamp}.pmbackup'
+        filename = f'password_backup_{username}_{timestamp}.pmb'
         
         # Retourne le fichier
         return send_file(
@@ -774,7 +937,7 @@ def internal_error(e):
 
 if __name__ == '__main__':
     print("\n" + "=" * 50)
-    print("🚀 LANCEMENT DE PASSWORD MANAGER WEB")
+    print(" LANCEMENT DE PASSWORD MANAGER WEB")
     print("=" * 50)
     
     # Vérifier les templates
@@ -805,6 +968,6 @@ if __name__ == '__main__':
     try:
         app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
     except KeyboardInterrupt:
-        print("\n👋 Arrêt du serveur")
+        print("\n Arrêt du serveur")
     except Exception as e:
-        print(f"\n❌ Erreur: {e}")
+        print(f"\n Erreur: {e}")
